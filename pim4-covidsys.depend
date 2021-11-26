@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1637828173 source:c:\dev\_unip\pim4-covidsys\main.c
+	<stdio.h>
+	<string.h>
+	<locale.h>
+	<windows.h>
+	<stdlib.h>
+
