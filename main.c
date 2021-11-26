@@ -253,64 +253,51 @@ void novoPaciente() {
 
     campoString(3, 5, "NOME", sizeof(novoPaciente.nome), "", temp, 1);
     strcpy(novoPaciente.nome, temp);
-    free(temp);
-
+    
     campoString(3, 6, "CPF", sizeof(novoPaciente.cpf)-1, " (APENAS NUMEROS)", temp, 1);
     strcpy(novoPaciente.cpf, temp);
-    free(temp);
-
+    
     campoString(3, 7, "DT.NASCTO", sizeof(novoPaciente.dataNascimento)-1, " (DD/MM/AAAA)", temp, 1);
     strcpy(novoPaciente.dataNascimento, temp);
-    free(temp);
-
+    
     campoString(3, 8, "TELEFONE", sizeof(novoPaciente.telefone), "", temp, 1);
     strcpy(novoPaciente.telefone, temp);
-    free(temp);
-
+    
     campoString(3, 9, "E-MAIL", sizeof(novoPaciente.email), "", temp, 1);
     strcpy(novoPaciente.email, temp);
-    free(temp);
-
+    
     //---
     novoTitulo("CADASTRAR PACIENTE >> DADOS DO ENDERECO");
 
     campoString(3, 11, "LOGRADOURO", sizeof(novoPaciente.endereco.rua), "", temp, 1);
     strcpy(novoPaciente.endereco.rua, temp);
-    free(temp);
-
+    
     campoString(3, 12, "NUMERO", sizeof(novoPaciente.endereco.numero), "", temp, 1);
     strcpy(novoPaciente.endereco.numero, temp);
-    free(temp);
-
+    
     campoString(3, 13, "BAIRRO", sizeof(novoPaciente.endereco.bairro), "", temp, 1);
     strcpy(novoPaciente.endereco.bairro, temp);
-    free(temp);
-
+    
     campoString(3, 14, "CIDADE", sizeof(novoPaciente.endereco.cidade), "", temp, 1);
     strcpy(novoPaciente.endereco.cidade, temp);
-    free(temp);
-
+    
     campoString(3, 15, "ESTADO", sizeof(novoPaciente.endereco.estado), "", temp, 1);
     strcpy(novoPaciente.endereco.estado, temp);
-    free(temp);
-
+    
     campoString(3, 16, "CEP", sizeof(novoPaciente.endereco.cep), " (99999-999)", temp, 1);
     strcpy(novoPaciente.endereco.cep, temp);
-    free(temp);
-
+    
     //---
     novoTitulo("CADASTRAR PACIENTE >> DADOS DO DIAGNOSTICO");
 
     campoString(3, 18, "DT.DIAGNOSTICO", sizeof(novoPaciente.dataDiagnostico)-1, " (DD/MM/AAAA)", temp, 1);
     strcpy(novoPaciente.dataDiagnostico, temp);
-    free(temp);
-
+    
     imprimeTexto(3, 19, "PACIENTE TEM COMORBIDADE?");
     imprimeTexto(3, 20, "[0]NAO [1]DIABETES [2]OBESIDADE [3]HIPERTENSAO [4]TUBERCULOSE [5]OUTROS");
     campoString(3, 21, "COMORBIDADE", sizeof(novoPaciente.comorbidade), "", temp, 1);
     strcpy(novoPaciente.comorbidade, getComorbidade(temp));
-    free(temp);
-
+    
     //---
     idadeCalculada = idadeEntreDatas(novoPaciente.dataNascimento, novoPaciente.dataDiagnostico);
 
