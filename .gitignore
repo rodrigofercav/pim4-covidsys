@@ -1,3 +1,5 @@
-*.csv
 *.exe
 *.o
+/obj*
+/bin*
+*.csv
