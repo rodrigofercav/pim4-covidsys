@@ -438,9 +438,12 @@ void imprimePaciente(PACIENTE p) {
     printf("DT.NASCTO: %s", p.dataNascimento);
 
     gotoxy(3, 12);
-    printf("E-MAIL: %s", p.email);
+    printf("TELEFONE: %s", p.telefone);
 
     gotoxy(3, 14);
+    printf("E-MAIL: %s", p.email);
+
+    gotoxy(3, 16);
     printf("ENDERECO: ");
     if (strlen(p.endereco.rua) > 0)
         printf(p.endereco.rua);
@@ -451,7 +454,7 @@ void imprimePaciente(PACIENTE p) {
         printf(p.endereco.numero);
     }
 
-    gotoxy(3, 15);
+    gotoxy(3, 17);
     printf("          ");
     if (strlen(p.endereco.bairro) > 0) {
         printf(p.endereco.bairro);
@@ -470,16 +473,16 @@ void imprimePaciente(PACIENTE p) {
     }
     //--FIM ENDERECO
 
-    gotoxy(3, 17);
+    gotoxy(3, 19);
     printf("CEP: %s", p.endereco.cep);
 
-    gotoxy(3, 19);
+    gotoxy(3, 21);
     printf("DT.DIAGNOSTICO: %s", p.dataDiagnostico);
 
-    gotoxy(3, 21);
+    gotoxy(3, 23);
     printf("COMORBIDADE: %s", p.comorbidade);
 
-    gotoxy(3, 23);
+    gotoxy(3, 25);
     printf("IDADE: %d", p.idade);
 }
 
@@ -516,12 +519,12 @@ int buscarNoArquivo(char* cpf) {
 
             for (tok = strtok(tmp, ","); tok && *tok; i++, tok = strtok(NULL, ","))
             {
-
                 strcpy(dados[i], tok);
             }
 
             if (strcmp(dados[1], cpf) == 0)
             {
+                /*
                 gotoxy(3, 8);
                 printf("NOME: %s\n", dados[0]);
 
@@ -593,7 +596,7 @@ int buscarNoArquivo(char* cpf) {
 
 
 
-                    /*
+             */
                 strcpy(paciente.nome, dados[0]);
                 strcpy(paciente.cpf, dados[1]);
                 strcpy(paciente.dataNascimento, dados[2]);
@@ -610,7 +613,7 @@ int buscarNoArquivo(char* cpf) {
                 paciente.idade = atoi(dados[13]);
 
                 imprimePaciente(paciente);
-                */
+
                 encontrado = 1;
 
                 break;
