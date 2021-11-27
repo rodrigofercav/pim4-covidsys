@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-//#include <time.h>
 #include <locale.h>
 #include <windows.h>
 #include <stdlib.h>
@@ -8,17 +7,12 @@
 
 // CONSTANTES - USO GERAL
 #define ESPACO 32
-#define HORIZ  61
 
 #define MAX_MSG 76
 #define MAX_STR 50
 
-#define LARGURA 120
-#define ALTURA  40
-
-#define CABECALHO "NOME,CPF,DATA_NASCIMENTO,TELEFONE,EMAIL,END_RUA,END_NUMERO,END_BAIRRO,END_CIDADE,END_ESTADO,END_CEP,DATA_DIAGNOSTICO,COMORBIDADE,IDADE,\n"
+#define CABECALHO "NOME,CPF,DATA_NASCIMENTO,TELEFONE,EMAIL,END_RUA,END_NUMERO,END_BAIRRO,END_CIDADE,END_ESTADO,END_CEP,DATA_DIAGNOSTICO,COMORBIDADE,IDADE\n"
 #define BUFFER_SIZE 1024
-#define DELIMITADOR ","
 
 #define USERMOCK "pim"
 #define PASSMOCK "Senha123"
@@ -36,11 +30,11 @@ struct data {
 
 typedef struct endereco ENDERECO;
 struct endereco {
-    char rua[MAX_STR];
+    char rua[50];
     char numero[6];
-    char bairro[MAX_STR];
-    char cidade[MAX_STR];
-    char estado[MAX_STR];
+    char bairro[21];
+    char cidade[21];
+    char estado[3];
     char cep[10];
 };
 
@@ -61,7 +55,6 @@ struct paciente {
 void gotoxy(int, int);
 void novoTitulo(char[]);
 void mensagemStatusBar(char[]);
-void limpaMensagemStatusBar();
 void imprimeSimbolo(int, int, int);
 void imprimeTexto(int, int, char[]);
 void desenhaLinha(int, int, int, int);
@@ -78,17 +71,15 @@ void configuraApp();
 char* campoString(int, int, char*, int, char*, char*, int);
 void pesquisarPaciente();
 void imprimirPaciente(PACIENTE, int, int);
-int buscarNoArquivo(const char*, const char*, int);
-/*int isEmpty(char*)
-long strlen(const char*);
-long strpos(const char*, const char*); */
+int buscarNoArquivo(char*);
+void imprimePaciente(PACIENTE);
+
 
 // INICIO DO APP
 int main() {
-    setlocale(LC_ALL, "Portuguese");
     configuraApp();
 
-    telaLogin();
+    //telaLogin();
 
     telaMenu();
 
@@ -114,42 +105,30 @@ void imprimeSimbolo(int posX, int posY, int simbolo) {
 }
 
 void mensagemStatusBar(char message[]) {
-    mensagemStatusBarFlutuante(0, message);
-}
-
-void mensagemStatusBarFlutuante(int posicao, char message[]) {
-    if (posicao < ALTURA-2) posicao = ALTURA-2;
-    desenhaLinha(1, posicao, HORIZ, LARGURA);
-    desenhaLinha(1, posicao + 2, ESPACO, LARGURA);
-    imprimeTexto(3, posicao + 1, message);
-}
-
-void limpaMensagemStatusBar() {
-    desenhaLinha(1, ALTURA-2, ESPACO, LARGURA);
-    desenhaLinha(1, ALTURA-1, ESPACO, LARGURA);
-    desenhaLinha(1, ALTURA-0, ESPACO, LARGURA);
-
+    desenhaLinha(2, 29, ESPACO, 78);
+    imprimeTexto(3, 29, message);
+    //return getch();
 }
 
 void desenhaTelaPrincipal() {
     system("cls");
 
-    desenhaLinha(1, 1, HORIZ, LARGURA);
-    desenhaLinha(1, 3, HORIZ, LARGURA);
-    desenhaLinha(1, ALTURA-2, HORIZ, LARGURA);
-    desenhaLinha(1, ALTURA, HORIZ, LARGURA);
+    desenhaLinha(1, 1, 205, 80);
+    desenhaLinha(1, 3, 205, 80);
+    desenhaLinha(1, 28, 205, 80);
+    desenhaLinha(1, 30, 205, 80);
 
-    //desenhaColuna(1, 1, 186, ALTURA);
-    //desenhaColuna(LARGURA, 1, 186, ALTURA);
+    desenhaColuna(1, 1, 186, 30);
+    desenhaColuna(80, 1, 186, 30);
 
-    //imprimeSimbolo(1, 1, 201);
-    //imprimeSimbolo(LARGURA, 1, 187);
-    //imprimeSimbolo(1, 3, 204);
-    //imprimeSimbolo(LARGURA, 3, 185);
-    //imprimeSimbolo(1, 28, 204);
-    //imprimeSimbolo(LARGURA, 28, 185);
-    //imprimeSimbolo(1, ALTURA, 200);
-    //imprimeSimbolo(LARGURA, ALTURA, 188);
+    imprimeSimbolo(1, 1, 201);
+    imprimeSimbolo(80, 1, 187);
+    imprimeSimbolo(1, 3, 204);
+    imprimeSimbolo(80, 3, 185);
+    imprimeSimbolo(1, 28, 204);
+    imprimeSimbolo(80, 28, 185);
+    imprimeSimbolo(1, 30, 200);
+    imprimeSimbolo(80, 30, 188);
 
 }
 
@@ -175,7 +154,7 @@ void desenhaColuna(int posicaoX, int posicaoY, int simbolo, int tamanho) {
 
 // FUNCIONALIDADES DO APP
 void configuraApp() {
-    system("MODE con cols=120 lines=40");
+    system("MODE con cols=80 lines=30");
 
     system("title CovidSYS - PIM IV 2021.2");
 
@@ -268,68 +247,67 @@ void telaMenu() {
 
 void novoPaciente() {
     PACIENTE novoPaciente;
-    int idadeCalculada = 0;
     char temp[MAX_STR];
 
     desenhaTelaPrincipal();
 
     //---
     novoTitulo("CADASTRAR PACIENTE >> DADOS PESSOAIS");
+    imprimeTexto(3, 27, "* = CAMPO OBRIGATORIO.");
 
-    campoString(3, 5, "NOME", sizeof(novoPaciente.nome)-1, "", temp, 1);
+
+    campoString(3, 5, "NOME", sizeof(novoPaciente.nome)-1, "*", temp, 1);
     strcpy(novoPaciente.nome, temp);
 
-    campoString(3, 6, "CPF", sizeof(novoPaciente.cpf)-1, " (APENAS NUMEROS)", temp, 1);
+    campoString(3, 6, "CPF", sizeof(novoPaciente.cpf)-1, " (APENAS NUMEROS)*", temp, 1);
     strcpy(novoPaciente.cpf, temp);
 
-    campoString(3, 7, "DT.NASCTO", sizeof(novoPaciente.dataNascimento)-1, " (DD/MM/AAAA)", temp, 1);
+    campoString(3, 7, "DT.NASCTO", sizeof(novoPaciente.dataNascimento)-1, " (DD/MM/AAAA)*", temp, 1);
     strcpy(novoPaciente.dataNascimento, temp);
 
-    campoString(3, 8, "TELEFONE", sizeof(novoPaciente.telefone), "", temp, 1);
+    campoString(3, 8, "TELEFONE", sizeof(novoPaciente.telefone), "*", temp, 1);
     strcpy(novoPaciente.telefone, temp);
 
-    campoString(3, 9, "E-MAIL", sizeof(novoPaciente.email), "", temp, 1);
+    campoString(3, 9, "E-MAIL", sizeof(novoPaciente.email), "*", temp, 1);
     strcpy(novoPaciente.email, temp);
 
     //---
     novoTitulo("CADASTRAR PACIENTE >> DADOS DO ENDERECO");
 
-    campoString(3, 11, "LOGRADOURO", sizeof(novoPaciente.endereco.rua), "", temp, 0);
+    campoString(3, 11, "LOGRADOURO", sizeof(novoPaciente.endereco.rua), "", temp, 1);
     strcpy(novoPaciente.endereco.rua, temp);
 
-    campoString(3, 12, "NUMERO", sizeof(novoPaciente.endereco.numero), "", temp, 0);
+    campoString(3, 12, "NUMERO", sizeof(novoPaciente.endereco.numero), "", temp, 1);
     strcpy(novoPaciente.endereco.numero, temp);
 
-    campoString(3, 13, "BAIRRO", sizeof(novoPaciente.endereco.bairro), "", temp, 0);
+    campoString(3, 13, "BAIRRO", sizeof(novoPaciente.endereco.bairro), "", temp, 1);
     strcpy(novoPaciente.endereco.bairro, temp);
 
-    campoString(3, 14, "CIDADE", sizeof(novoPaciente.endereco.cidade), "", temp, 0);
+    campoString(3, 14, "CIDADE", sizeof(novoPaciente.endereco.cidade), "", temp, 1);
     strcpy(novoPaciente.endereco.cidade, temp);
 
-    campoString(3, 15, "ESTADO", sizeof(novoPaciente.endereco.estado), "", temp, 0);
+    campoString(3, 15, "ESTADO", sizeof(novoPaciente.endereco.estado), "", temp, 1);
     strcpy(novoPaciente.endereco.estado, temp);
 
-    campoString(3, 16, "CEP", sizeof(novoPaciente.endereco.cep), " (99999-999)", temp, 1);
+    campoString(3, 16, "CEP", sizeof(novoPaciente.endereco.cep), " (99999-999)*", temp, 1);
     strcpy(novoPaciente.endereco.cep, temp);
 
     //---
     novoTitulo("CADASTRAR PACIENTE >> DADOS DO DIAGNOSTICO");
 
-    campoString(3, 18, "DT.DIAGNOSTICO", sizeof(novoPaciente.dataDiagnostico)-1, " (DD/MM/AAAA)", temp, 1);
+    campoString(3, 18, "DT.DIAGNOSTICO", sizeof(novoPaciente.dataDiagnostico)-1, " (DD/MM/AAAA)*", temp, 1);
     strcpy(novoPaciente.dataDiagnostico, temp);
 
     imprimeTexto(3, 19, "PACIENTE TEM COMORBIDADE?");
     imprimeTexto(3, 20, "[0]NAO [1]DIABETES [2]OBESIDADE [3]HIPERTENSAO [4]TUBERCULOSE [5]OUTROS");
-    campoString(3, 21, "COMORBIDADE", sizeof(novoPaciente.comorbidade), "", temp, 1);
+    campoString(3, 21, "COMORBIDADE", sizeof(novoPaciente.comorbidade), "*", temp, 1);
     strcpy(novoPaciente.comorbidade, getComorbidade(temp));
 
     //---
-    idadeCalculada = idadeEntreDatas(novoPaciente.dataNascimento, novoPaciente.dataDiagnostico);
+    novoPaciente.idade = idadeEntreDatas(novoPaciente.dataNascimento, novoPaciente.dataDiagnostico);
 
-    novoPaciente.idade = idadeCalculada;
-
-    if (strlen(novoPaciente.comorbidade) != 0 && idadeCalculada >= 65) {
-        if (salvaRiscoComorbidade(novoPaciente, idadeCalculada) == 0) {
+    if (strlen(novoPaciente.comorbidade) != 0 && novoPaciente.idade >= 65) {
+        if (salvaRiscoComorbidade(novoPaciente, novoPaciente.idade) == 0) {
             mensagemStatusBar("GRUPO DE RISCO + COMORBIDADE! PRESSIONE QUALQUER TECLA PARA CONTINUAR...");
             getch();
         }
@@ -388,7 +366,7 @@ int salvaRiscoComorbidade(PACIENTE paciente, int idadeCalculada) {
 
     if (arquivoComorbidade == NULL) {
         printf("Problema ao abrir arquivo '%s'...", ARQUIVO_COMORBIDADE);
-        printf("Verifique as permissões de escrita na pasta principal do programa.");
+        printf("Verifique as permissoes de escrita na pasta principal do programa.");
         getch();
         return 1;
     }
@@ -410,7 +388,7 @@ int salvaNovoPaciente(PACIENTE paciente) {
 
     if (arquivoPaciente == NULL) {
         printf("Problema ao abrir arquivo '%s'...", ARQUIVO_PACIENTES);
-        printf("Verifique as permissões de escrita na pasta principal do programa.");
+        printf("Verifique as permissoes de escrita na pasta principal do programa.");
         getch();
 
         return 1;
@@ -421,7 +399,7 @@ int salvaNovoPaciente(PACIENTE paciente) {
         fprintf(arquivoPaciente, CABECALHO, NULL);
     }
 
-    fprintf(arquivoPaciente, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%d,\n",
+    fprintf(arquivoPaciente, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%d\n",
             paciente.nome, paciente.cpf, paciente.dataNascimento, paciente.telefone, paciente.email,
             paciente.endereco.rua, paciente.endereco.numero, paciente.endereco.bairro,
             paciente.endereco.cidade, paciente.endereco.estado, paciente.endereco.cep,
@@ -433,109 +411,76 @@ int salvaNovoPaciente(PACIENTE paciente) {
 }
 
 void pesquisarPaciente() {
+    char temp[MAX_STR];
+    char cpf[12];
+
     desenhaTelaPrincipal();
 
-    novoTitulo("PESQUISAR PACIENTE >> ");
-    imprimeTexto(3, 5, "1 - PESQUISAR POR NOME");
-    imprimeTexto(3, 7, "2 - PESQUISAR POR CPF");
-    imprimeTexto(3, 9, "9 - LISTAR TODOS");
-    imprimeTexto(3, 11, "0 - RETORNAR PARA O MENU PRINCIPAL");
-    mensagemStatusBar("ESCOLHA UMA DAS OPCOES ACIMA...");
+    novoTitulo("PESQUISAR PACIENTE");
 
-    char campo[MAX_STR];
-    while (1) {
-        int op_menu = getch();
+    campoString(3, 5, "CPF", sizeof(cpf)-1, "", temp, 1);
+    strcpy(cpf, temp);
 
-        desenhaTelaPrincipal();
-        if (op_menu == '1') {
-            novoTitulo("PESQUISAR PACIENTE >> PESQUISA POR NOME");
-            imprimeTexto(3, 5, "Informe o Nome: ");
-            fflush(stdin);
-            gets(campo);
-            op_menu = buscarNoArquivo(campo, "", 1);
-        }
-        else if (op_menu == '2') {
-            novoTitulo("PESQUISAR PACIENTE >> PESQUISA POR CPF");
-            imprimeTexto(3, 5, "Informe o CPF: ");
-            fflush(stdin);
-            gets(campo);
-            op_menu = buscarNoArquivo("", campo, 0);
-        }
-        else if (op_menu == '9') {
-            desenhaTelaPrincipal();
-            op_menu = buscarNoArquivo("", "", 1);
-        }
-        else {
-            mensagemStatusBar("OPCAO INVALIDA! PRESSIONE QUALQUER TECLA PARA TENTAR NOVAMENTE...");
-            getch();
-        }
+    buscarNoArquivo(cpf);
 
-        if (op_menu == '0') {
-            return;
-        }
-    }
-
-    //---
+    getch();
 }
 
-int isEmpty(char* value) {
-    if (value == NULL || value[0] == '\0')
-        return 1;
-    else
-        return 0;
-}
+void imprimePaciente(PACIENTE p) {
+    gotoxy(3, 8);
+    printf("NOME: %s\n", p.nome);
 
-int imprimePaciente(PACIENTE p, int posicao, int lista) {
-    char* endereco = "";
-    if (!isEmpty(p.endereco.rua))
-        endereco = p.endereco.rua;
-    if (!isEmpty(p.endereco.numero)) {
-        if (!isEmpty(endereco)) strcat(endereco, ", ");
-        strcat(endereco, p.endereco.numero);
-    }
-    if (!isEmpty(p.endereco.bairro)) {
-        if (!isEmpty(endereco)) strcat(endereco, ", ");
-        strcat(endereco, p.endereco.bairro);
-    }
-    if (!isEmpty(p.endereco.cidade)) {
-        if (!isEmpty(endereco)) strcat(endereco, ", ");
-        strcat(endereco, p.endereco.cidade);
-    }
-    if (!isEmpty(p.endereco.estado)) {
-        if (!isEmpty(endereco)) strcat(endereco, ", ");
-        strcat(endereco, p.endereco.estado);
+    //NÃƒO PRECISA MOSTRAR O CPF, JÃ FOI O CAMPO PESQUISADO
+    //gotoxy(3, 10);
+    //printf("CPF: %s", p.cpf);
+
+    gotoxy(3, 10);
+    printf("DT.NASCTO: %s", p.dataNascimento);
+
+    gotoxy(3, 12);
+    printf("E-MAIL: %s", p.email);
+
+    gotoxy(3, 14);
+    printf("ENDERECO: ");
+    if (strlen(p.endereco.rua) > 0)
+        printf(p.endereco.rua);
+
+    if (strlen(p.endereco.numero) > 0) {
+        if (strlen(p.endereco.rua) > 0)
+            printf(", ");
+        printf(p.endereco.numero);
     }
 
-    if (lista) {
-        gotoxy(3, posicao + 6);
-        printf("%d | %s | %s | %s | %s | %s | %s | %s | %s | %d\n",
-              posicao, p.nome, p.cpf, p.dataNascimento, p.email, endereco, p.endereco.cep,
-              p.dataDiagnostico, p.comorbidade, p.idade);
-
-        return 1;
-    } else {
-        gotoxy(3, posicao + 6);
-        printf("NOME: %s", p.nome);
-        gotoxy(3, posicao + 7);
-        printf("CPF: %s", p.cpf);
-        gotoxy(3, posicao + 8);
-        printf("DATA NASCIMENTO: %s", p.dataNascimento);
-        gotoxy(3, posicao + 9);
-        printf("EMAIL: %s", p.email);
-        gotoxy(3, posicao + 10);
-        printf("ENDEREÇO: %s", endereco);
-        gotoxy(3, posicao + 11);
-        printf("CEP: %s", p.endereco.cep);
-        gotoxy(3, posicao + 12);
-        printf("Data de Diagnóstico: %s", p.dataDiagnostico);
-        gotoxy(3, posicao + 13);
-        printf("Comorbidade: %s", p.comorbidade);
-        gotoxy(3, posicao + 14);
-        printf("Idade: %s", p.idade);
-
-        return 14;
+    gotoxy(3, 15);
+    printf("          ");
+    if (strlen(p.endereco.bairro) > 0) {
+        printf(p.endereco.bairro);
     }
 
+    if (strlen(p.endereco.cidade) > 0) {
+        if (strlen(p.endereco.bairro) > 0)
+            printf(", ");
+        printf(p.endereco.cidade);
+    }
+
+    if (strlen(p.endereco.estado) > 0) {
+        if (strlen(p.endereco.cidade) > 0)
+            printf(", ");
+        printf(p.endereco.estado);
+    }
+    //--FIM ENDERECO
+
+    gotoxy(3, 17);
+    printf("CEP: %s", p.endereco.cep);
+
+    gotoxy(3, 19);
+    printf("DT.DIAGNOSTICO: %s", p.dataDiagnostico);
+
+    gotoxy(3, 21);
+    printf("COMORBIDADE: %s", p.comorbidade);
+
+    gotoxy(3, 23);
+    printf("IDADE: %d", p.idade);
 }
 
 const char* getfield(char* line, int num) {
@@ -549,22 +494,15 @@ const char* getfield(char* line, int num) {
 	return NULL;
 }
 
-int buscarNoArquivo(const char* nome, const char* cpf, int lista) {
+//int buscarNoArquivo(const char* nome, const char* cpf, int lista) {
+int buscarNoArquivo(char* cpf) {
     FILE* arquivoPaciente;
     arquivoPaciente = fopen(ARQUIVO_PACIENTES, "r");
 
     char line[BUFFER_SIZE];
-    int pos = 1;
-    int encontrados = 0;
+    int encontrado = 0;
 
     novoTitulo("PESQUISAR PACIENTE >> RESULTADO");
-
-    if (lista) {
-        imprimeTexto(3, 5, "ID | NOME | CPF | DATA NASC. | TELEFONE | EMAIL | ENDERECO | CEP | DATA DIAG.  | COMORBIDADE | IDADE\n");
-        imprimeTexto(2, 6, "------------------------------------------------------------------------------------------------------\n");
-    }
-
-    limpaMensagemStatusBar();
 
     while (fgets(line, BUFFER_SIZE, arquivoPaciente)) {
         char* tmp = strdup(line);
@@ -575,94 +513,164 @@ int buscarNoArquivo(const char* nome, const char* cpf, int lista) {
             char dados[14][MAX_STR];
             int i = 0;
             const char* tok;
-            for (tok = strtok(tmp, ","); tok && *tok; i++, tok = strtok(NULL, ",\n"))
+
+            for (tok = strtok(tmp, ","); tok && *tok; i++, tok = strtok(NULL, ","))
             {
+
                 strcpy(dados[i], tok);
             }
-            strcpy(paciente.nome, dados[0]);
-            strcpy(paciente.cpf, dados[1]);
-            strcpy(paciente.dataNascimento, dados[2]);
-            strcpy(paciente.telefone, dados[3]);
-            strcpy(paciente.email, dados[4]);
-            strcpy(paciente.endereco.rua, dados[5]);
-            strcpy(paciente.endereco.numero, dados[6]);
-            strcpy(paciente.endereco.bairro, dados[7]);
-            strcpy(paciente.endereco.cidade, dados[8]);
-            strcpy(paciente.endereco.estado, dados[9]);
-            strcpy(paciente.endereco.cep, dados[10]);
-            strcpy(paciente.dataDiagnostico, dados[11]);
-            strcpy(paciente.comorbidade, dados[12]);
-            paciente.idade = atoi(dados[13]);
 
-            if (isEmpty(nome) && isEmpty(cpf))
-                encontrados += imprimePaciente(paciente, pos, lista);
-            else if (!isEmpty(nome) && strpos(paciente.nome, nome) > 0)
-                encontrados += imprimePaciente(paciente, pos, lista);
-            else if (!isEmpty(cpf) && strcmp(paciente.cpf, cpf) == 0)
-                encontrados += imprimePaciente(paciente, pos, lista);
-            pos++;
+            if (strcmp(dados[1], cpf) == 0)
+            {
+                gotoxy(3, 8);
+                printf("NOME: %s\n", dados[0]);
+
+                //NÃƒO PRECISA MOSTRAR O CPF, JÃ FOI O CAMPO PESQUISADO
+                //gotoxy(3, 10);
+                //printf("CPF: %s", p.cpf);
+
+                gotoxy(3, 10);
+                printf("DT.NASCTO: %s", dados[2]);
+
+                gotoxy(3, 12);
+                printf("TELEFONE: %s", dados[3]);
+
+                gotoxy(3, 14);
+                printf("E-MAIL: %s", dados[4]);
+
+                gotoxy(3, 16);
+                printf("ENDERECO: >> ");
+                printf("%d", strlen(dados[5]));
+                if (strlen(dados[5]) > 0)
+                    printf(dados[5]);
+
+                printf("%d", strlen(dados[6]));
+                if (strlen(dados[6]) > 0) {
+                    if (strlen(dados[5]) > 0)
+                        printf(", ");
+                    printf(dados[6]);
+                }
+
+                gotoxy(3, 17);
+                printf("          >> ");
+                if (strlen(dados[7]) > 0) {
+                    printf(dados[7]);
+                }
+
+                if (strlen(dados[8]) > 0) {
+                    if (strlen(dados[7]) > 0)
+                        printf(", ");
+                    printf(dados[8]);
+                }
+
+                if (strlen(dados[9]) > 0) {
+                    if (strlen(dados[8]) > 0)
+                        printf(", ");
+                    printf(dados[9]);
+                }
+                //--FIM ENDERECO
+
+                gotoxy(3, 19);
+                printf("CEP: %s", dados[10]);
+
+                gotoxy(3, 21);
+                printf("DT.DIAGNOSTICO: %s", dados[11]);
+
+                gotoxy(3, 23);
+                printf("COMORBIDADE: %s", dados[12]);
+
+                gotoxy(3, 25);
+                printf("IDADE: %s", dados[13]);
+
+
+
+
+
+
+
+
+
+
+
+
+                    /*
+                strcpy(paciente.nome, dados[0]);
+                strcpy(paciente.cpf, dados[1]);
+                strcpy(paciente.dataNascimento, dados[2]);
+                strcpy(paciente.telefone, dados[3]);
+                strcpy(paciente.email, dados[4]);
+                strcpy(paciente.endereco.rua, dados[5]);
+                strcpy(paciente.endereco.numero, dados[6]);
+                strcpy(paciente.endereco.bairro, dados[7]);
+                strcpy(paciente.endereco.cidade, dados[8]);
+                strcpy(paciente.endereco.estado, dados[9]);
+                strcpy(paciente.endereco.cep, dados[10]);
+                strcpy(paciente.dataDiagnostico, dados[11]);
+                strcpy(paciente.comorbidade, dados[12]);
+                paciente.idade = atoi(dados[13]);
+
+                imprimePaciente(paciente);
+                */
+                encontrado = 1;
+
+                break;
+            }
         }
 
+        memset(line, 0, BUFFER_SIZE);
         free(tmp);
     }
 
     fclose(arquivoPaciente);
 
-    gotoxy(3, 8 + pos);
-    if (encontrados > 0)
-        printf("Pacientes encontrados: %d", encontrados);
-    else
-        printf("Nenhum paciente encontrado!");
+    if (!encontrado)
+        mensagemStatusBar("PACIENTE NÃƒO ENCONTRADO! PRESSIONE QUALQUER TECLA PARA CONTINUAR...");
 
-    mensagemStatusBar("PRESSIONE 0 PARA VOLTAR AO MENU PRINCIPAL OU QUALQUER TECLA PARA NOVA PESQUISA...");
-    //mensagemStatusBarFlutuante(10 + pos, "PRESSIONE 0 PARA VOLTAR AO MENU PRINCIPAL OU QUALQUER TECLA PARA NOVA PESQUISA...");
-
-    int op = getch();
-    return op;
+    mensagemStatusBar("PRESSIONE [N] PARA NOVA PESQUISA OU QUALQUER TECLA PARA RETORNAR AO MENU...");
 }
 
 /**
  * Procura a string b na string a.
  *
- * Retorna -1 se `b` não for encontrada em `a`, ou o índice da
- * primeira ocorrência de b em a.
+ * Retorna -1 se `b` nï¿½o for encontrada em `a`, ou o ï¿½ndice da
+ * primeira ocorrï¿½ncia de b em a.
  */
 int strpos(const char *a, const char *b, int ignoreCase)
 {
     int alen, blen;    /* comprimento das strings */
-    int found_at;      /* variável auxiliar: guardará a posição da
-                           primeira ocorrência de b em a */
-    int i, j;          /* variáveis auxiliares usadas nos loops */
+    int found_at;      /* variï¿½vel auxiliar: guardarï¿½ a posiï¿½ï¿½o da
+                           primeira ocorrï¿½ncia de b em a */
+    int i, j;          /* variï¿½veis auxiliares usadas nos loops */
 
     /* calcular o comprimento de cada string */
     alen = strlen(a);
     blen = strlen(b);
 
-    /* se b é mais longa que a, com certeza a não contém b */
+    /* se b ï¿½ mais longa que a, com certeza a nï¿½o contï¿½m b */
     if (blen > alen) {
         return -1;
     }
 
-    /* este loop externo encontra a primeira ocorrência de b[0] em a */
+    /* este loop externo encontra a primeira ocorrï¿½ncia de b[0] em a */
     found_at = -1;
     for (i = 0; i < alen; ++i) {
         if (ignoreCase ? toupper(a[i]) == toupper(b[0]) : a[i] == b[0]) {
 
-            /* guarda a posição da ocorrência */
+            /* guarda a posiï¿½ï¿½o da ocorrï¿½ncia */
             found_at = i;
 
             /* este loop interno compara a substring `a[i:i+j]` byte-a-byte
              * com b */
             for (j = 0; j < blen && found_at != -1; ++j) {
                 if (ignoreCase ? toupper(a[i + j]) != toupper(b[j]) : a[i + j] == b[j]) {
-                    /* se um byte não for igual, então é por que não encontramos */
+                    /* se um byte nï¿½o for igual, entï¿½o ï¿½ por que nï¿½o encontramos */
                     found_at = -1;
                 }
             }
 
-            /* encontrado, retorna a posição guardada em found_at */
+            /* encontrado, retorna a posiï¿½ï¿½o guardada em found_at */
             /* aqui a gente poderia simplesmente usar break, mas para tornar o
-             * código ainda mais "simples" vamos retornar */
+             * cï¿½digo ainda mais "simples" vamos retornar */
             if (found_at != -1) {
                 return i;
             }
